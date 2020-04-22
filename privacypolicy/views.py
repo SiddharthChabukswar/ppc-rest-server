@@ -120,55 +120,54 @@ class call_model(APIView):
 
 		return [scores, color]
 
-	def get(self, request):
-		if request.method == 'GET':
-			# Fetch Link from GUI in string(weblink)
-			weblink = JSONParser().parse(request)["weblink"]
+	def post(self, request):
+		# Fetch Link from GUI in string(weblink)
+		weblink = JSONParser().parse(request)["weblink"]
 
-			# Scrape Webpage using Scrapper Ref, check for errors
-			pageContent = self.scraperFun(weblink)
-			pageSize = len(pageContent)
-			if pageSize < 10:
-				# Handle Scrapping Unsuccessful here in this if block!! The below statement is temporary
-				print("Scrapping Failure v.1")
-				# return render(request, "output.html", {'pageContent' : pageSize})
-				return JsonResponse({}, status = 400)
-			print("Scraped Successfully")
+		# Scrape Webpage using Scrapper Ref, check for errors
+		pageContent = self.scraperFun(weblink)
+		pageSize = len(pageContent)
+		if pageSize < 10:
+			# Handle Scrapping Unsuccessful here in this if block!! The below statement is temporary
+			print("Scrapping Failure v.1")
+			# return render(request, "output.html", {'pageContent' : pageSize})
+			return JsonResponse({}, status = 400)
+		print("Scraped Successfully")
 
-			# Vectorize the pageContent if pipeline proceeds
-			vectorizedData = self.vectorizeFun(pageContent)
-			# print(vectorizedData[0].shape, "\n", vectorizedData[1].shape, "\n", vectorizedData[2].shape, "\n", vectorizedData[3].shape, "\n", vectorizedData[4].shape, "\n", vectorizedData[5].shape, "\n")
-			print("Vectorized Successfully")
+		# Vectorize the pageContent if pipeline proceeds
+		vectorizedData = self.vectorizeFun(pageContent)
+		# print(vectorizedData[0].shape, "\n", vectorizedData[1].shape, "\n", vectorizedData[2].shape, "\n", vectorizedData[3].shape, "\n", vectorizedData[4].shape, "\n", vectorizedData[5].shape, "\n")
+		print("Vectorized Successfully")
 
-			# Filter the vectorized Data
-			filteredData = self.filterFun(pageContent, vectorizedData)
-			# print(filteredData[0].shape, "\n", filteredData[1].shape, "\n", filteredData[2].shape, "\n", filteredData[3].shape, "\n", filteredData[4].shape, "\n", filteredData[5].shape, "\n")
-			print("Filtered Successfully")
+		# Filter the vectorized Data
+		filteredData = self.filterFun(pageContent, vectorizedData)
+		# print(filteredData[0].shape, "\n", filteredData[1].shape, "\n", filteredData[2].shape, "\n", filteredData[3].shape, "\n", filteredData[4].shape, "\n", filteredData[5].shape, "\n")
+		print("Filtered Successfully")
 
-			# Check for scrape v.2
-			totalData = 0
-			for i in range(0, 5):
-				totalData = totalData + len(filteredData[i])
-			if totalData < 6:
-				print("Scrapping Failure v.2")
-				# return render(request, "output.html", {'pageContent' : pageSize})
-				return JsonResponse({}, status = 400)
+		# Check for scrape v.2
+		totalData = 0
+		for i in range(0, 5):
+			totalData = totalData + len(filteredData[i])
+		if totalData < 6:
+			print("Scrapping Failure v.2")
+			# return render(request, "output.html", {'pageContent' : pageSize})
+			return JsonResponse({}, status = 400)
 
-			# Tokenize the filtered Data, Prepare for Grading 
-			paddedData = self.tokenizeFun(filteredData)
-			# print(paddedData[0].shape, "\n", paddedData[1].shape, "\n", paddedData[2].shape, "\n", paddedData[3].shape, "\n", paddedData[4].shape, "\n", paddedData[5].shape, "\n")
-			print("Tokenized Successfully")
+		# Tokenize the filtered Data, Prepare for Grading 
+		paddedData = self.tokenizeFun(filteredData)
+		# print(paddedData[0].shape, "\n", paddedData[1].shape, "\n", paddedData[2].shape, "\n", paddedData[3].shape, "\n", paddedData[4].shape, "\n", paddedData[5].shape, "\n")
+		print("Tokenized Successfully")
 
-			# Grade the Data
-			gradedData = self.gradeFun(paddedData)
-			# print(gradedData[0], "\n", gradedData[1], "\n", gradedData[2], "\n", gradedData[3], "\n", gradedData[4], "\n", gradedData[5], "\n")
-			print("Graded Successfully")
+		# Grade the Data
+		gradedData = self.gradeFun(paddedData)
+		# print(gradedData[0], "\n", gradedData[1], "\n", gradedData[2], "\n", gradedData[3], "\n", gradedData[4], "\n", gradedData[5], "\n")
+		print("Graded Successfully")
 
-			# Calculate final scores
-			finalOutput = self.calculateScore(gradedData)
-			finalScores = finalOutput[0]
-			finalColor = finalOutput[1]
-			# print(finalScores)
-			print("All Done!!!!")
-			
-			return JsonResponse({"Type1" : finalScores[0], "Type2" : finalScores[1], "Type3" : finalScores[2], "Type4" : finalScores[3], "Type5" : finalScores[4], "Type6" : finalScores[5]}, status = 201)
+		# Calculate final scores
+		finalOutput = self.calculateScore(gradedData)
+		finalScores = finalOutput[0]
+		finalColor = finalOutput[1]
+		# print(finalScores)
+		print("All Done!!!!")
+		
+		return JsonResponse({"Type1" : finalScores[0], "Type2" : finalScores[1], "Type3" : finalScores[2], "Type4" : finalScores[3], "Type5" : finalScores[4], "Type6" : finalScores[5]}, status = 201)
